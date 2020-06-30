@@ -34,14 +34,17 @@ async def calculate_set_ranking(when: TimeRange):
 
 async def get_ranking_from_influx(when):
     time_from, time_to = get_time_range(when)
-    query = f'SELECT sum("value") FROM power WHERE {time_from} <= time AND time <= {time_to} GROUP BY "id"'
+    query = f"SELECT sum(value) FROM power WHERE '{time_from}' <= time AND time <= '{time_to}' GROUP BY id"
     async with aioinflux.InfluxDBClient(
             host=config.INFLUX_HOST, port=config.INFLUX_PORT, db=config.INFLUX_DB
     ) as client:
         response = await client.query(query)
         unordered_ranking = []
-        for point in iterpoints(response, lambda *x, meta: dict(zip(meta["columns"], x))):
-            unordered_ranking.append((point["id"], point["sum"]))
+        for series in response["results"]:
+            for point in series["series"]:
+                id = point["tags"]["id"]
+                value = point["values"][point["columns"].index("sum")]
+                unordered_ranking.append((id, value))
         return sorted(unordered_ranking, key=lambda p: p[1], reverse=True)
 
 

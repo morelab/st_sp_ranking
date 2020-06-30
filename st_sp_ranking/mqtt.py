@@ -123,7 +123,7 @@ class MQTT(MQTTClient):
             subtopics = topic.split("/")
             when, smartplug_id = subtopics[-2:]
             logger.log_info(f"Getting ranking: {when} - {smartplug_id}")
-            ranking = influx.get_ranking(smartplug_id, when)
+            ranking = await influx.get_ranking(smartplug_id, when)
             logger.log_info(f"Ranking: {ranking}")
             response = {"data": ranking}
             self.publish(response_topic, response)
