@@ -1,3 +1,4 @@
+import json
 import asyncio
 from typing import Dict, List, Any, Callable, Coroutine, Optional
 
@@ -5,7 +6,7 @@ from gmqtt import Client as MQTTClient
 from gmqtt.mqtt.constants import MQTTv311
 
 from st_sp_ranking import logger
-from st_sp_ranking import protocol
+from st_sp_ranking import protocol, influx
 
 MQTTTopic = str
 MQTTPayload = bytes
@@ -117,7 +118,7 @@ class MQTT(MQTTClient):
 
     async def handle_message(self, topic: str, payload, properties):
         logger.log_info(f"Handle message: {payload}")
-        response_topic = payload.decode()[protocol.RESPONSE_ID_FIELD]
+        response_topic = json.loads(payload.decode())[protocol.RESPONSE_ID_FIELD]
         try:
             subtopics = topic.split("/")
             when, smartplug_id = subtopics[-2:]
