@@ -10,4 +10,4 @@ VOLUME ./config
 
 CMD ["./run.sh"]
 
-# docker run --network=iotoad_network -v $(pwd)/config:/app/config st_sp_ranking
+# docker run -v $(pwd)/config:/app/config --link mqtt --link influxdb st_sp_ranking

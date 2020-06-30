@@ -4,7 +4,7 @@ ORIGIN_DIRECTORTY=$(pwd)
 BASEDIR=$(dirname "$0")
 {
   cd "$BASEDIR"
-  python -m toad_influx_query.main
+  python -m st_sp_ranking.main
 } ||{
   :
 }
