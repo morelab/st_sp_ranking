@@ -1,10 +1,11 @@
-from gmqtt.mqtt.constants import MQTTv311
 import asyncio
 from typing import Dict, List, Any, Callable, Coroutine, Optional
 
 from gmqtt import Client as MQTTClient
+from gmqtt.mqtt.constants import MQTTv311
 
 from st_sp_ranking import logger
+from st_sp_ranking import protocol
 
 MQTTTopic = str
 MQTTPayload = bytes
@@ -57,11 +58,11 @@ class MQTT(MQTTClient):
         logger.log_info_verbose("SUBSCRIBED")
 
     async def start(
-        self,
-        broker_host: str,
-        message_handler: MessageHandler,
-        topics: List[MQTTTopic],
-        token: str = None,
+            self,
+            broker_host: str,
+            message_handler: MessageHandler,
+            topics: List[MQTTTopic],
+            token: str = None,
     ):
         """
         Runs the MQTT client.
@@ -95,7 +96,7 @@ class MQTT(MQTTClient):
             self.running = False
 
     async def _run_loop(
-        self, broker_host: str, token: Optional[str], topics: List[MQTTTopic]
+            self, broker_host: str, token: Optional[str], topics: List[MQTTTopic]
     ):
         """
         Method that starts the MQTT client and waits for it to stop.
@@ -113,3 +114,18 @@ class MQTT(MQTTClient):
         self._STARTED.set()
         await self._STOP.wait()
         await self.disconnect()
+
+    async def handle_message(self, topic: str, payload, properties):
+        logger.log_info(f"Handle message: {payload}")
+        response_topic = payload.decode()[protocol.RESPONSE_ID_FIELD]
+        try:
+            subtopics = topic.split("/")
+            when, smartplug_id = subtopics[-2:]
+            logger.log_info(f"Getting ranking: {when} - {smartplug_id}")
+            ranking = influx.get_ranking(smartplug_id, when)
+            logger.log_info(f"Ranking: {ranking}")
+            response = {"data": ranking}
+            self.publish(response_topic, response)
+        except Exception as err:
+            self.publish(response_topic, {"error": f"Error getting the ranking: {err}"})
+        # TODO: how to reply if response topic is unknown?

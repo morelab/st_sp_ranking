@@ -1,8 +1,7 @@
 # MQTT
-TOPIC = "query/sp_ranking"
+TOPIC = "query/sp_ranking/#"
 DATA_FIELD = "data"
 RESPONSE_ID_FIELD = "response-id"
-
 
 # InfluxDB
 POWER_MEASURE = "power"

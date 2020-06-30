@@ -10,4 +10,4 @@ VOLUME ./config
 
 CMD ["./run.sh"]
 
-# docker run -v $(pwd)/config:/app/config --link mqtt --link influxdb st_sp_ranking
+# docker run -v $(pwd)/config:/app/config --network toad_main_default --name st_sp_ranking st_sp_ranking
