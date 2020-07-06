@@ -1,9 +1,8 @@
 import datetime
-from typing import Union, Tuple
+from typing import Union, Tuple, Dict
 
 import aioinflux
 import strict_rfc3339 as rfc339
-from aioinflux import iterpoints
 
 from st_sp_ranking import config
 
@@ -11,27 +10,22 @@ Ranking = int
 TimeRange = Union["today", "week", "month"]
 Rfc3339 = str
 
-ranking_cache = {}
-
 
 async def get_ranking(smartplug_id: str, when: TimeRange) -> Ranking:
-    if when in ranking_cache and smartplug_id in ranking_cache[when]:
-        return ranking_cache[when][smartplug_id]
-    await calculate_set_ranking(when)
-    if smartplug_id not in ranking_cache[when]:
+    ranking = await get_calculate_ranking(when)
+    if smartplug_id not in ranking:
         raise ValueError(f"There is no ranking data for {smartplug_id}")
-    return ranking_cache[when][smartplug_id]
+    return ranking[smartplug_id]
 
 
-async def calculate_set_ranking(when: TimeRange):
-    global ranking_cache
-    ranking_cache[when] = {}
-
-    ranking = await get_ranking_from_influx(when)
+async def get_calculate_ranking(when: TimeRange) -> Dict[str, Ranking]:
+    ranking = {}
+    tupled_ranking = await get_ranking_from_influx(when)
     position = 1
-    for smartplug_id, consumption in ranking:
-        ranking_cache[when][smartplug_id] = position
+    for smartplug_id, consumption in tupled_ranking:
+        ranking[smartplug_id] = position
         position += 1
+    return ranking
 
 
 async def get_ranking_from_influx(when):
