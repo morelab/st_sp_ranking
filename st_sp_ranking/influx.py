@@ -6,19 +6,22 @@ import strict_rfc3339 as rfc339
 
 from st_sp_ranking import config
 
-Ranking = int
+RankingPosition = int
+RankingAmount = int
 TimeRange = Union["today", "week", "month"]
 Rfc3339 = str
 
 
-async def get_ranking(smartplug_id: str, when: TimeRange) -> Ranking:
+async def get_ranking(
+    smartplug_id: str, when: TimeRange
+) -> Tuple[RankingPosition, RankingAmount]:
     ranking = await get_calculate_ranking(when)
     if smartplug_id not in ranking:
         raise ValueError(f"There is no ranking data for {smartplug_id}")
-    return ranking[smartplug_id]
+    return ranking[smartplug_id], len(ranking)
 
 
-async def get_calculate_ranking(when: TimeRange) -> Dict[str, Ranking]:
+async def get_calculate_ranking(when: TimeRange) -> Dict[str, RankingPosition]:
     ranking = {}
     tupled_ranking = await get_ranking_from_influx(when)
     position = 1

@@ -1,5 +1,5 @@
-import json
 import asyncio
+import json
 from typing import Dict, List, Any, Callable, Coroutine, Optional
 
 from gmqtt import Client as MQTTClient
@@ -123,9 +123,13 @@ class MQTT(MQTTClient):
             subtopics = topic.split("/")
             when, smartplug_id = subtopics[-2:]
             logger.log_info(f"Getting ranking: {when} - {smartplug_id}")
-            ranking = await influx.get_ranking(smartplug_id, when)
-            logger.log_info(f"Ranking: {ranking}")
-            response = {"data": ranking}
+            ranking_position, ranking_amount = await influx.get_ranking(
+                smartplug_id, when
+            )
+            logger.log_info(f"Ranking: {ranking_position}")
+            response = {
+                "data": {"position": ranking_position, "amount": ranking_amount}
+            }
             self.publish(response_topic, response)
         except Exception as err:
             self.publish(response_topic, {"error": f"Error getting the ranking: {err}"})
