@@ -59,11 +59,11 @@ class MQTT(MQTTClient):
         logger.log_info_verbose("SUBSCRIBED")
 
     async def start(
-            self,
-            broker_host: str,
-            message_handler: MessageHandler,
-            topics: List[MQTTTopic],
-            token: str = None,
+        self,
+        broker_host: str,
+        message_handler: MessageHandler,
+        topics: List[MQTTTopic],
+        token: str = None,
     ):
         """
         Runs the MQTT client.
@@ -97,7 +97,7 @@ class MQTT(MQTTClient):
             self.running = False
 
     async def _run_loop(
-            self, broker_host: str, token: Optional[str], topics: List[MQTTTopic]
+        self, broker_host: str, token: Optional[str], topics: List[MQTTTopic]
     ):
         """
         Method that starts the MQTT client and waits for it to stop.
