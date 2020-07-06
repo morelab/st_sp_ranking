@@ -18,7 +18,7 @@ async def get_ranking(smartplug_id: str, when: TimeRange) -> Ranking:
     if when in ranking_cache and smartplug_id in ranking_cache[when]:
         return ranking_cache[when][smartplug_id]
     await calculate_set_ranking(when)
-    if smartplug_id in ranking_cache[when]:
+    if smartplug_id not in ranking_cache[when]:
         raise ValueError(f"There is no ranking data for {smartplug_id}")
     return ranking_cache[when][smartplug_id]
 
